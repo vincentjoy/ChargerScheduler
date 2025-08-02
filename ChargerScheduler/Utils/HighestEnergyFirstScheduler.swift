@@ -15,8 +15,11 @@ class HighestEnergyFirstScheduler: ChargingScheduler {
     func schedule(trucks: [Truck], chargers: [Charger], timeWindow: Double) -> ChargingSchedule {
         let trucksNeedingCharge = trucks.filter { !$0.isFullyCharged }
         
+        // Pre-sort chargers by charging rate (fastest first)
+        let sortedChargers = chargers.sorted { $0.chargingRate > $1.chargingRate }
+        
         var chargerAvailability: [String: Double] = [:]
-        for charger in chargers {
+        for charger in sortedChargers {
             chargerAvailability[charger.id] = 0.0
         }
         
@@ -26,32 +29,24 @@ class HighestEnergyFirstScheduler: ChargingScheduler {
         let sortedTrucks = trucksNeedingCharge.sorted { $0.energyNeededToFull > $1.energyNeededToFull }
         
         for truck in sortedTrucks {
-            // Find the best charger for this truck (fastest that can complete the job)
-            var bestOption: (Charger, Double, Double)? = nil // (charger, startTime, duration)
-            
-            for charger in chargers {
+            // Find first available charger that can complete the job
+            for charger in sortedChargers {
                 if let timeRequired = truck.timeToFullCharge(using: charger) {
                     let chargerAvailableAt = chargerAvailability[charger.id] ?? 0.0
                     
                     if chargerAvailableAt + timeRequired <= timeWindow {
-                        if bestOption == nil || timeRequired < bestOption!.2 {
-                            bestOption = (charger, chargerAvailableAt, timeRequired)
-                        }
+                        let session = ChargingSession(
+                            truck: truck,
+                            charger: charger,
+                            startTime: chargerAvailableAt,
+                            duration: timeRequired
+                        )
+                        
+                        sessions.append(session)
+                        chargerAvailability[charger.id] = chargerAvailableAt + timeRequired
+                        break // Take the first (fastest) available charger
                     }
                 }
-            }
-            
-            // Schedule with best option if found
-            if let (charger, startTime, duration) = bestOption {
-                let session = ChargingSession(
-                    truck: truck,
-                    charger: charger,
-                    startTime: startTime,
-                    duration: duration
-                )
-                
-                sessions.append(session)
-                chargerAvailability[charger.id] = startTime + duration
             }
         }
         
