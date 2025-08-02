@@ -17,7 +17,7 @@ struct AllocationChartView: View {
                     Text(key)
                         .frame(width: 100, alignment: .leading)
                     ScrollView(.horizontal) {
-                        HStack {
+                        LazyHStack {
                             ForEach(schedule.sessionsByCharger[key]!, id: \.self) { truck in
                                 Rectangle()
                                     .fill(Color.random)

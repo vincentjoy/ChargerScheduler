@@ -13,15 +13,41 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 20) {
+                LazyVStack(spacing: 20) {
+                    
                     TruckInputView(viewModel: viewModel)
+                    
+                    LazyVStack(spacing: 8) {
+                        ForEach(viewModel.dataManager.trucks, id: \.id) { truck in
+                            TruckConfigRow(truck: truck)
+                                .swipeActions {
+                                    Button("Delete", role: .destructive) {
+                                        viewModel.deleteTruck(truck)
+                                    }
+                                }
+                        }
+                    }
+                    
                     ChargerInputView(viewModel: viewModel)
+                    
+                    LazyVStack(spacing: 8) {
+                        ForEach(viewModel.dataManager.chargers, id: \.id) { charger in
+                            ChargerConfigRow(charger: charger)
+                                .swipeActions {
+                                    Button("Delete", role: .destructive) {
+                                        viewModel.deleteCharger(charger)
+                                    }
+                                }
+                        }
+                    }
+                    
                     HStack {
                         Text("Total Time (hours)")
                         Stepper(value: $viewModel.dataManager.availableTimeWindow, in: 1...24) {
                             Text("\(viewModel.dataManager.availableTimeWindow) hrs")
                         }
                     }
+                    
                     Button("Generate Schedule") {
                         viewModel.generateSchedule()
                     }

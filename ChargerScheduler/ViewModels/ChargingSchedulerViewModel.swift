@@ -70,12 +70,20 @@ class ChargingSchedulerViewModel: ObservableObject {
     }
     
     func addTruck(capacity: Double, percent: Double) {
-        let id = "Truck_\(dataManager.trucks.count + 1)"
+        let id = "Truck_\(dataManager.trucks.count)"
         dataManager.addTruck(Truck(id: id, batteryCapacity: capacity, currentChargeLevel: percent))
     }
     
     func addCharger(rate: Double) {
-        let id = "Charger_\(dataManager.chargers.count + 1)"
+        let id = "Charger_\(dataManager.chargers.count)"
         dataManager.addCharger(Charger(id: id, chargingRate: rate))
+    }
+    
+    func deleteTruck(_ truck: Truck) {
+        dataManager.removeTruck(withId: truck.id)
+    }
+    
+    func deleteCharger(_ charger: Charger) {
+        dataManager.removeCharger(withId: charger.id)
     }
 }
