@@ -80,4 +80,33 @@ final class ChargerSchedulerTests: XCTestCase {
         XCTAssertEqual(charger.chargingRate, 0.0)
     }
 
+    // MARK: - Greedy Scheduler Tests
+    
+    func testGreedySchedulerBasicFunctionality() throws {
+        let timeWindow = 5.0 // 5 hours
+        let schedule = greedyScheduler.schedule(trucks: trucks, chargers: chargers, timeWindow: timeWindow)
+        
+        // Should schedule some trucks
+        XCTAssertGreaterThan(schedule.sessions.count, 0)
+        XCTAssertEqual(schedule.totalTimeWindow, timeWindow)
+        
+        // All sessions should fit within time window
+        for session in schedule.sessions {
+            XCTAssertLessThanOrEqual(session.endTime, timeWindow)
+            XCTAssertGreaterThanOrEqual(session.startTime, 0.0)
+            XCTAssertGreaterThan(session.duration, 0.0)
+        }
+    }
+    
+    func testGreedySchedulerPrioritizesShortestTime() throws {
+        let timeWindow = 10.0
+        let schedule = greedyScheduler.schedule(trucks: trucks, chargers: chargers, timeWindow: timeWindow)
+        
+        // T3 should be scheduled first (shortest charging time: 20kWh/100kW = 0.2h)
+        let t3Sessions = schedule.sessions.filter { $0.truck.id == "T3" }
+        XCTAssertEqual(t3Sessions.count, 1)
+        
+        // T3 should start at time 0 (first to be scheduled)
+        XCTAssertEqual((t3Sessions.first?.startTime ?? 0), 0.0, accuracy: 0.01)
+    }
 }
