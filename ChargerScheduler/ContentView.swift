@@ -48,6 +48,8 @@ struct ContentView: View {
                         }
                     }
                     
+                    SchedulingControlsSection(viewModel: viewModel)
+                    
                     Button("Generate Schedule") {
                         viewModel.generateSchedule()
                     }
