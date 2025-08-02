@@ -15,6 +15,10 @@ struct ChargingSchedule {
 struct ChargingSession {
     let truck: Truck
     let charger: Charger
-    let startTime: Double
-    let endTime: Double
+    let startTime: Double // hours from start
+    let duration: Double // hours
+    
+    var endTime: Double {
+        return startTime + duration
+    }
 }
