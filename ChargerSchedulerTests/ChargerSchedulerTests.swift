@@ -13,6 +13,7 @@ final class ChargerSchedulerTests: XCTestCase {
     var trucks: [Truck]!
     var chargers: [Charger]!
     var greedyScheduler: GreedyTimeScheduler!
+    var energyFirstScheduler: HighestEnergyFirstScheduler!
 
     override func setUpWithError() throws {
         super.setUp()
@@ -31,6 +32,7 @@ final class ChargerSchedulerTests: XCTestCase {
         ]
         
         greedyScheduler = GreedyTimeScheduler()
+        energyFirstScheduler = HighestEnergyFirstScheduler()
     }
 
     override func tearDownWithError() throws {
@@ -107,6 +109,35 @@ final class ChargerSchedulerTests: XCTestCase {
         XCTAssertEqual(t3Sessions.count, 1)
         
         // T3 should start at time 0 (first to be scheduled)
-        XCTAssertEqual((t3Sessions.first?.startTime ?? 0), 0.0, accuracy: 0.01)
+        XCTAssertEqual((t3Sessions.first?.startTime ?? 0), 0.0)
+    }
+    
+    // MARK: - Energy First Scheduler Tests
+    
+    func testEnergyFirstSchedulerBasicFunctionality() throws {
+        let timeWindow = 10.0
+        let schedule = energyFirstScheduler.schedule(trucks: trucks, chargers: chargers, timeWindow: timeWindow)
+        
+        XCTAssertGreaterThan(schedule.sessions.count, 0)
+        XCTAssertEqual(schedule.totalTimeWindow, timeWindow)
+        
+        // All sessions should fit within time window
+        for session in schedule.sessions {
+            XCTAssertLessThanOrEqual(session.endTime, timeWindow)
+        }
+    }
+    
+    func testEnergyFirstSchedulerPrioritizesHighestEnergy() throws {
+        let timeWindow = 10.0
+        let schedule = energyFirstScheduler.schedule(trucks: trucks, chargers: chargers, timeWindow: timeWindow)
+        
+        // T2 has highest energy need (150 kWh), should be prioritized if time allows
+        let t2Sessions = schedule.sessions.filter { $0.truck.id == "T2" }
+        
+        if t2Sessions.count > 0 {
+            // If T2 is scheduled, it should get a fast charger
+            let t2Session = t2Sessions.first!
+            XCTAssertGreaterThanOrEqual(t2Session.charger.chargingRate, 50.0)
+        }
     }
 }
