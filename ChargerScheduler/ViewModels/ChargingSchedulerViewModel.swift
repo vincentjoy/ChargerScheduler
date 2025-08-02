@@ -79,11 +79,17 @@ class ChargingSchedulerViewModel: ObservableObject {
         dataManager.addCharger(Charger(id: id, chargingRate: rate))
     }
     
-    func deleteTruck(_ truck: Truck) {
-        dataManager.removeTruck(withId: truck.id)
+    func deleteTrucks(offsets: IndexSet) {
+        for index in offsets {
+            let truck = dataManager.trucks[index]
+            dataManager.removeTruck(withId: truck.id)
+        }
     }
     
-    func deleteCharger(_ charger: Charger) {
-        dataManager.removeCharger(withId: charger.id)
+    func deleteChargers(offsets: IndexSet) {
+        for index in offsets {
+            let charger = dataManager.chargers[index]
+            dataManager.removeCharger(withId: charger.id)
+        }
     }
 }

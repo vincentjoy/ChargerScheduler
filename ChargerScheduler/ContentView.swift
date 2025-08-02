@@ -17,29 +17,25 @@ struct ContentView: View {
                     
                     TruckInputView(viewModel: viewModel)
                     
-                    LazyVStack(spacing: 8) {
+                    List {
                         ForEach(viewModel.dataManager.trucks, id: \.id) { truck in
                             TruckConfigRow(truck: truck)
-                                .swipeActions {
-                                    Button("Delete", role: .destructive) {
-                                        viewModel.deleteTruck(truck)
-                                    }
-                                }
                         }
+                        .onDelete(perform: viewModel.deleteTrucks)
                     }
+                    .listStyle(.plain)
+                    .frame(height: CGFloat(viewModel.dataManager.trucks.count * 50))
                     
                     ChargerInputView(viewModel: viewModel)
                     
-                    LazyVStack(spacing: 8) {
+                    List {
                         ForEach(viewModel.dataManager.chargers, id: \.id) { charger in
                             ChargerConfigRow(charger: charger)
-                                .swipeActions {
-                                    Button("Delete", role: .destructive) {
-                                        viewModel.deleteCharger(charger)
-                                    }
-                                }
                         }
+                        .onDelete(perform: viewModel.deleteChargers)
                     }
+                    .listStyle(.plain)
+                    .frame(height: CGFloat(viewModel.dataManager.chargers.count * 50))
                     
                     HStack {
                         Text("Total Time (hours)")
