@@ -1,5 +1,5 @@
 //
-//  DataManager.swift
+//  DataSamples.swift
 //  ChargerScheduler
 //
 //  Created by Vincent Joy on 02/08/25.
@@ -11,7 +11,7 @@ import Foundation
  * Manages sample data and configuration for the charging scheduler
  * This is where you can easily modify input data for testing different scenarios
  */
-class DataManager: ObservableObject {
+class DataSamples: ObservableObject {
     
     // MARK: - Sample Data Configuration
     
@@ -34,40 +34,4 @@ class DataManager: ObservableObject {
     ]
     
     static let timeWindow: Double = 8.0 // 8 hours overnight
-    
-    // MARK: - Dynamic Data Properties
-    
-    @Published var trucks: [Truck]
-    @Published var chargers: [Charger]
-    @Published var availableTimeWindow: Double
-    
-    init() {
-        self.trucks = Self.sampleTrucks
-        self.chargers = Self.sampleChargers
-        self.availableTimeWindow = Self.timeWindow
-    }
-    
-    // MARK: - Data Modification Methods
-    
-    func resetToDefaults() {
-        trucks = Self.sampleTrucks
-        chargers = Self.sampleChargers
-        availableTimeWindow = Self.timeWindow
-    }
-    
-    func addTruck(_ truck: Truck) {
-        trucks.append(truck)
-    }
-    
-    func removeTruck(withId id: String) {
-        trucks.removeAll { $0.id == id }
-    }
-    
-    func addCharger(_ charger: Charger) {
-        chargers.append(charger)
-    }
-    
-    func removeCharger(withId id: String) {
-        chargers.removeAll { $0.id == id }
-    }
 }

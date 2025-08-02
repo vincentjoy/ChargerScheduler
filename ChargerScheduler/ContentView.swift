@@ -17,30 +17,34 @@ struct ContentView: View {
                     
                     TruckInputView(viewModel: viewModel)
                     
-                    List {
-                        ForEach(viewModel.dataManager.trucks, id: \.id) { truck in
-                            TruckConfigRow(truck: truck)
+                    if !viewModel.trucks.isEmpty {
+                        List {
+                            ForEach(viewModel.trucks, id: \.id) { truck in
+                                TruckConfigRow(truck: truck)
+                            }
+                            .onDelete(perform: viewModel.deleteTrucks)
                         }
-                        .onDelete(perform: viewModel.deleteTrucks)
+                        .listStyle(.plain)
+                        .frame(height: CGFloat(viewModel.trucks.count * 50))
                     }
-                    .listStyle(.plain)
-                    .frame(height: CGFloat(viewModel.dataManager.trucks.count * 50))
                     
                     ChargerInputView(viewModel: viewModel)
                     
-                    List {
-                        ForEach(viewModel.dataManager.chargers, id: \.id) { charger in
-                            ChargerConfigRow(charger: charger)
+                    if !viewModel.chargers.isEmpty {
+                        List {
+                            ForEach(viewModel.chargers, id: \.id) { charger in
+                                ChargerConfigRow(charger: charger)
+                            }
+                            .onDelete(perform: viewModel.deleteChargers)
                         }
-                        .onDelete(perform: viewModel.deleteChargers)
+                        .listStyle(.plain)
+                        .frame(height: CGFloat(viewModel.chargers.count * 50))
                     }
-                    .listStyle(.plain)
-                    .frame(height: CGFloat(viewModel.dataManager.chargers.count * 50))
                     
                     HStack {
                         Text("Total Time (hours)")
-                        Stepper(value: $viewModel.dataManager.availableTimeWindow, in: 1...24) {
-                            Text("\(viewModel.dataManager.availableTimeWindow) hrs")
+                        Stepper(value: $viewModel.availableTimeWindow, in: 1...24) {
+                            Text("\(viewModel.availableTimeWindow) hrs")
                         }
                     }
                     
@@ -57,6 +61,13 @@ struct ContentView: View {
             }
             .navigationTitle("Truck Charging Scheduler")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Reset") {
+                        viewModel.resetToDefaults()
+                    }
+                }
+            }
         }
     }
 }

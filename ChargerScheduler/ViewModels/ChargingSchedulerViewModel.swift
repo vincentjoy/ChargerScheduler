@@ -12,10 +12,13 @@ class ChargingSchedulerViewModel: ObservableObject {
     
     // MARK: - Published Properties
     
+    @Published var trucks: [Truck]
+    @Published var chargers: [Charger]
+    @Published var availableTimeWindow: Double
+    
     @Published var schedule: ChargingSchedule?
     @Published var isScheduling: Bool = false
     @Published var selectedAlgorithm: SchedulingAlgorithm = .greedyTime
-    @Published var dataManager = DataManager()
     
     // MARK: - Private Properties
     
@@ -42,6 +45,13 @@ class ChargingSchedulerViewModel: ObservableObject {
         }
     }
     
+    init() {
+        // Initialize with sample data
+        self.trucks = DataSamples.sampleTrucks
+        self.chargers = DataSamples.sampleChargers
+        self.availableTimeWindow = DataSamples.timeWindow
+    }
+    
     // MARK: - Methods
     
     func generateSchedule() {
@@ -53,9 +63,9 @@ class ChargingSchedulerViewModel: ObservableObject {
             
             let scheduler = schedulers[selectedAlgorithm] ?? GreedyTimeScheduler()
             let newSchedule = scheduler.schedule(
-                trucks: dataManager.trucks,
-                chargers: dataManager.chargers,
-                timeWindow: dataManager.availableTimeWindow
+                trucks: self.trucks,
+                chargers: self.chargers,
+                timeWindow: self.availableTimeWindow
             )
             
             await MainActor.run {
@@ -65,31 +75,28 @@ class ChargingSchedulerViewModel: ObservableObject {
         }
     }
     
-    func clearSchedule() {
-        schedule = nil
-    }
-    
     func addTruck(capacity: Double, percent: Double) {
-        let id = "Truck_\(dataManager.trucks.count)"
-        dataManager.addTruck(Truck(id: id, batteryCapacity: capacity, currentChargeLevel: percent))
+        let id = "Truck_\(trucks.count + 1)"
+        trucks.append(Truck(id: id, batteryCapacity: capacity, currentChargeLevel: percent))
     }
     
     func addCharger(rate: Double) {
-        let id = "Charger_\(dataManager.chargers.count)"
-        dataManager.addCharger(Charger(id: id, chargingRate: rate))
+        let id = "Charger_\(chargers.count + 1)"
+        chargers.append(Charger(id: id, chargingRate: rate))
     }
     
     func deleteTrucks(offsets: IndexSet) {
-        for index in offsets {
-            let truck = dataManager.trucks[index]
-            dataManager.removeTruck(withId: truck.id)
-        }
+        trucks.remove(atOffsets: offsets)
     }
     
     func deleteChargers(offsets: IndexSet) {
-        for index in offsets {
-            let charger = dataManager.chargers[index]
-            dataManager.removeCharger(withId: charger.id)
-        }
+        chargers.remove(atOffsets: offsets)
+    }
+    
+    func resetToDefaults() {
+        trucks = DataSamples.sampleTrucks
+        chargers = DataSamples.sampleChargers
+        availableTimeWindow = DataSamples.timeWindow
+        schedule = nil
     }
 }
