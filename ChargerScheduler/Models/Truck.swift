@@ -17,4 +17,17 @@ struct Truck: Identifiable, Hashable {
         self.batteryCapacity = batteryCapacity
         self.currentChargeLevel = min(max(currentChargeLevel, 0), 100) // Clamp between 0-100
     }
+    
+    var energyNeededToFull: Double {
+        return batteryCapacity * (1 - currentChargeLevel / 100)
+    }
+    
+    func timeToFullCharge(using charger: Charger) -> Double? {
+        guard currentChargeLevel < 100 else { return nil }
+        return energyNeededToFull / charger.chargingRate
+    }
+    
+    var isFullyCharged: Bool {
+        return currentChargeLevel >= 100
+    }
 }
