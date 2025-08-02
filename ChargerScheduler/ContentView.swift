@@ -51,6 +51,11 @@ struct ContentView: View {
                     Button("Generate Schedule") {
                         viewModel.generateSchedule()
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                     
                     if let schedule = viewModel.schedule {
                         Divider()
