@@ -8,11 +8,34 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var viewModel = ChargingSchedulerViewModel()
+    
     var body: some View {
-        VStack {
-            Text("Hello, world!")
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    TruckInputView(viewModel: viewModel)
+                    ChargerInputView(viewModel: viewModel)
+                    HStack {
+                        Text("Total Time (hours)")
+                        Stepper(value: $viewModel.dataManager.availableTimeWindow, in: 1...24) {
+                            Text("\(viewModel.dataManager.availableTimeWindow) hrs")
+                        }
+                    }
+                    Button("Generate Schedule") {
+                        viewModel.generateSchedule()
+                    }
+                    
+                    if let schedule = viewModel.schedule {
+                        Divider()
+                        AllocationChartView(schedule: schedule)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Truck Charging Scheduler")
+            .navigationBarTitleDisplayMode(.inline)
         }
-        .padding()
     }
 }
 

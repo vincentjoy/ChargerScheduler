@@ -10,6 +10,16 @@ import Foundation
 struct ChargingSchedule {
     let sessions: [ChargingSession]
     let totalTimeWindow: Double
+    
+    var sessionsByCharger: [String: [Truck]] {
+        var result: [String: [Truck]] = [:]
+        
+        for session in sessions {
+            result[session.charger.id, default: []].append(session.truck)
+        }
+        
+        return result
+    }
 }
 
 struct ChargingSession {
