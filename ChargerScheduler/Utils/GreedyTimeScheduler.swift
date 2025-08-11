@@ -9,54 +9,66 @@ import Foundation
 
 /**
  Greedy scheduling algorithm that prioritizes trucks requiring least charging time
-*/
+ */
 
 class GreedyTimeScheduler: ChargingScheduler {
     
     func schedule(trucks: [Truck], chargers: [Charger], timeWindow: Double) -> ChargingSchedule {
         let trucksNeedingCharge = trucks.filter { !$0.isFullyCharged }
         
-        var chargerAvailability: [String: Double] = [:]
-        for charger in chargers {
-            chargerAvailability[charger.id] = 0.0
-        }
+        var chargerQueue = chargers.map { ChargerAvailability(charger: $0, availableAt: 0.0) }
+        chargerQueue.sort()
         
         var sessions: [ChargingSession] = []
-        var scheduledTrucks: Set<String> = []
         
-        // Sort trucks by energy needed (least energy first for quicker wins)
+        // Sort trucks by energy needed (Greedy: least energy first)
         let sortedTrucks = trucksNeedingCharge.sorted { $0.energyNeededToFull < $1.energyNeededToFull }
         
         for truck in sortedTrucks {
-            if scheduledTrucks.contains(truck.id) { continue }
             
             // Find the best available charger for this truck
-            var bestOption: (charger: Charger, startTime: Double, duration: Double)?
+            var bestOption: (index: Int, startTime: Double, duration: Double)?
             var earliestCompletion = Double.infinity
             
-            for charger in chargers {
-                guard let timeRequired = truck.timeToFullCharge(using: charger) else { continue }
+            for  (index, chargerAvailability) in chargerQueue.enumerated() {
+                guard let timeRequired = truck.timeToFullCharge(using: chargerAvailability.charger) else { continue }
                 
-                let chargerAvailableAt = chargerAvailability[charger.id] ?? 0.0
-                let completionTime = chargerAvailableAt + timeRequired
+                let completionTime = chargerAvailability.availableAt + timeRequired
+                
+                // Early termination: if this charger (earliest available) can't fit, later ones won't either
+                if chargerAvailability.availableAt >= timeWindow {
+                    break
+                }
                 
                 if completionTime <= timeWindow && completionTime < earliestCompletion {
                     earliestCompletion = completionTime
-                    bestOption = (charger, chargerAvailableAt, timeRequired)
+                    bestOption = (index, chargerAvailability.availableAt, timeRequired)
+                    
+                    // Early termination: if we found a charger available now, use it
+                    if chargerAvailability.availableAt == 0 {
+                        break
+                    }
                 }
             }
             
-            if let option = bestOption {
+            if let bestOption {
+                let chargerAvailability = chargerQueue[bestOption.index]
                 let session = ChargingSession(
                     truck: truck,
-                    charger: option.charger,
-                    startTime: option.startTime,
-                    duration: option.duration
+                    charger: chargerAvailability.charger,
+                    startTime: bestOption.startTime,
+                    duration: bestOption.duration
                 )
                 
                 sessions.append(session)
-                scheduledTrucks.insert(truck.id)
-                chargerAvailability[option.charger.id] = option.startTime + option.duration
+                chargerQueue[bestOption.index].availableAt = bestOption.startTime + bestOption.duration
+                
+                // Re-position this charger in the queue (bubble sort style for single element)
+                var updatedIndex = bestOption.index
+                while (updatedIndex < chargerQueue.count - 1) && (chargerQueue[updatedIndex] > chargerQueue[updatedIndex+1]) {
+                    chargerQueue.swapAt(updatedIndex, updatedIndex+1)
+                    updatedIndex += 1  // Move to the next position after swapping
+                }
             }
         }
         
