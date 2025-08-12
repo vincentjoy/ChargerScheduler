@@ -24,23 +24,23 @@ class ChargingSchedulerViewModel: ObservableObject {
     
     private var schedulers: [SchedulingAlgorithm: ChargingScheduler] = [
         .greedyTime: GreedyTimeScheduler(),
-        .highestEnergyFirst: HighestEnergyFirstScheduler()
+        .priorityQueue: HeapBasedScheduler()
     ]
     
     // MARK: - Scheduling Algorithms Enum
     
     enum SchedulingAlgorithm: String, CaseIterable, Identifiable {
-        case greedyTime = "Greedy (Shortest Time First)"
-        case highestEnergyFirst = "Highest Energy First"
+        case greedyTime = "Greedy Approach"
+        case priorityQueue = "MinHeap Approach"
         
         var id: String { rawValue }
         
         var description: String {
             switch self {
             case .greedyTime:
-                return "Prioritizes trucks that can be charged fastest"
-            case .highestEnergyFirst:
-                return "Prioritizes trucks with highest energy requirements"
+                return "Efficient truck allocation based on greedy approach"
+            case .priorityQueue:
+                return "Efficient truck allocation based on priority queue"
             }
         }
     }

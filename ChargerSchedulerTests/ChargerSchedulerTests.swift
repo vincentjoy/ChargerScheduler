@@ -13,7 +13,7 @@ final class ChargerSchedulerTests: XCTestCase {
     var trucks: [Truck]!
     var chargers: [Charger]!
     var greedyScheduler: GreedyTimeScheduler!
-    var energyFirstScheduler: HighestEnergyFirstScheduler!
+    var priorityQueueScheduler: HeapBasedScheduler!
 
     override func setUpWithError() throws {
         super.setUp()
@@ -32,7 +32,7 @@ final class ChargerSchedulerTests: XCTestCase {
         ]
         
         greedyScheduler = GreedyTimeScheduler()
-        energyFirstScheduler = HighestEnergyFirstScheduler()
+        priorityQueueScheduler = HeapBasedScheduler()
     }
 
     override func tearDownWithError() throws {
@@ -114,9 +114,9 @@ final class ChargerSchedulerTests: XCTestCase {
     
     // MARK: - Energy First Scheduler Tests
     
-    func testEnergyFirstSchedulerBasicFunctionality() throws {
+    func testPriorityQueueSchedulerBasicFunctionality() throws {
         let timeWindow = 10.0
-        let schedule = energyFirstScheduler.schedule(trucks: trucks, chargers: chargers, timeWindow: timeWindow)
+        let schedule = priorityQueueScheduler.schedule(trucks: trucks, chargers: chargers, timeWindow: timeWindow)
         
         XCTAssertGreaterThan(schedule.sessions.count, 0)
         XCTAssertEqual(schedule.totalTimeWindow, timeWindow)
@@ -127,9 +127,9 @@ final class ChargerSchedulerTests: XCTestCase {
         }
     }
     
-    func testEnergyFirstSchedulerPrioritizesHighestEnergy() throws {
+    func testPriorityQueueSchedulerPrioritizesHighestEnergy() throws {
         let timeWindow = 10.0
-        let schedule = energyFirstScheduler.schedule(trucks: trucks, chargers: chargers, timeWindow: timeWindow)
+        let schedule = priorityQueueScheduler.schedule(trucks: trucks, chargers: chargers, timeWindow: timeWindow)
         
         // T2 has highest energy need (150 kWh), should be prioritized if time allows
         let t2Sessions = schedule.sessions.filter { $0.truck.id == "T2" }
